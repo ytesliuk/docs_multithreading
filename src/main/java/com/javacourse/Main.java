@@ -1,55 +1,66 @@
 package com.javacourse;
 
+import com.javacourse.institutes.*;
+
 import java.util.*;
 
 /**
  * Created by Yuliia Tesliuk on 11/26/2018
  */
 public class Main {
+    private static List<AbstractInstitute> institutes = new ArrayList<>();
 
     public static void main(String[] args){
         List<Document> documents = fillingDocumentLibrary();
         DocumentManager manager = new DocumentManager(documents);
-        AbstractInstitute mathsInst = new MathsInstitute("Maths Institute", manager);
-        AbstractInstitute biologyInst = new BiologyInstitute("Biology Institute", manager);
-        AbstractInstitute genInst = new GeneralInstitute("General Institute", manager);
-
         manager.createQueue();
 
-        Thread th1 = new Thread(mathsInst, "MathsInst Thread");
-        Thread th2 = new Thread(biologyInst, "BiologyInst Thread");
-        Thread th3 = new Thread(genInst, "GenInst Thread");
+        institutes.add(new MathsInstitute("Maths Institute", manager));
+        institutes.add(new BiologyInstitute("Biology Institute", manager));
+        institutes.add(new GeneralInstitute("General Institute", manager));
 
-        th1.start();
-        th2.start();
-        th3.start();
+        Thread[] threads = new Thread[institutes.size()];
+
+        for (int i = 0; i < threads.length; i++) {
+            threads[i] = new Thread(institutes.get(i));
+        }
+
+        for (Thread th: threads) {
+            th.start();
+        }
 
         try {
-            th1.join();
-            th2.join();
-            th3.join();
+            for (Thread th: threads) {
+                th.join();
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        System.out.println(manager.getQueue().size());
-        System.out.println(mathsInst.getName() + " has " + mathsInst.getDocuments().size() + " documents");
-        System.out.println(biologyInst.getName() + " has " + biologyInst.getDocuments().size() + " documents");
-        System.out.println(genInst.getName() + " has " + genInst.getDocuments().size() + " documents");
-
-        System.out.println("sum: " + (mathsInst.getDocuments().size() + biologyInst.getDocuments().size() + genInst.getDocuments().size()));
+        printStatistic();
 
     }
+
 
     private static List<Document> fillingDocumentLibrary() {
         List<Document> documents = new ArrayList<>(450);
         for (int i = 0; i < 200; i++) {
-            documents.add(new Document(i, DocumentType.BIOLOGY));
+            documents.add(new Document("name - " + i, ScientistSpeciality.BIOLOGIST));
         }
         for (int i = 200; i < 450; i++) {
-            documents.add(new Document(i, DocumentType.MATHS));
+            documents.add(new Document("name - " + i, ScientistSpeciality.MATHEMATICIAN));
         }
         return documents;
+    }
+
+
+    private static void printStatistic() {
+        int totalNumberOfDocuments = 0;
+        for (AbstractInstitute i : institutes){
+            System.out.println(i.getName() + " has " + i.getDocuments().size() + " documents");
+            totalNumberOfDocuments += i.getDocuments().size();
+        }
+        System.out.println("Total amount of collected documents: " + totalNumberOfDocuments);
     }
 
 

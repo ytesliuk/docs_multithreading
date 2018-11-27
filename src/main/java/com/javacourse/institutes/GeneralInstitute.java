@@ -1,5 +1,6 @@
-package com.javacourse;
+package com.javacourse.institutes;
 
+import com.javacourse.*;
 import java.util.Random;
 
 /**
@@ -15,15 +16,13 @@ public class GeneralInstitute extends AbstractInstitute {
     }
 
     @Override
-    public boolean takeDocumentForRevision(Document document) {
+    protected boolean takeDocumentForRevision(Document document) {
         if(randomRequest > 0){
             getDocuments().add(document);
             randomRequest--;
-            System.out.print(this.getName() + " get " + document.getId() + " " + document.getType());
             return true;
         } else {
-            System.out.print(this.getName() + " stopped on " + document.getId() + " " + document.getType());
-            setWaitBeforeRequest(true);
+            setNeedToWaitBeforeNewRequest(true);
             randomRequest = random.nextInt(5) + 1;
             return false;
         }

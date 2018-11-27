@@ -1,7 +1,9 @@
-package com.javacourse;
+package com.javacourse.institutes;
 
-import java.util.ArrayList;
-import java.util.NoSuchElementException;
+import com.javacourse.Document;
+import com.javacourse.DocumentManager;
+
+import java.util.*;
 
 /**
  * Created by Yuliia Tesliuk on 11/26/2018
@@ -10,17 +12,24 @@ public abstract class AbstractInstitute  implements Runnable {
     private String name;
     private ArrayList<Document> documents;
     private DocumentManager docManager;
-    private boolean waitBeforeRequest = false;
+    private boolean needToWaitBeforeNewRequest = false;
 
-    public AbstractInstitute(String name, DocumentManager docManager) {
+    AbstractInstitute(String name, DocumentManager docManager) {
         this.name = name;
         this.docManager = docManager;
         this.documents = new ArrayList<>();
     }
 
-    public abstract boolean takeDocumentForRevision(Document document);
+    @Override
+    public void run() {
+        while(getNewDocument(getDocManager())){
+            if(needToWaitBeforeNewRequest){
+                waitBeforeNewRequest(100);
+            }
+        }
+    }
 
-    public boolean getNewDocument(DocumentManager manager){
+    protected boolean getNewDocument(DocumentManager manager){
         try {
             manager.offerDocument(this);
             return true;
@@ -29,19 +38,16 @@ public abstract class AbstractInstitute  implements Runnable {
         }
     }
 
-    @Override
-    public void run() {
-        while(getNewDocument(getDocManager())){
-            if(waitBeforeRequest){
-                waitBeforeNewRequest(100);
-            }
-        }
+    public boolean isAccepted(Document document){
+        return takeDocumentForRevision(document);
     }
+
+    protected abstract boolean takeDocumentForRevision(Document document);
 
     private void waitBeforeNewRequest(int millis) {
         try {
             Thread.sleep(millis);
-            waitBeforeRequest = false;
+            needToWaitBeforeNewRequest = false;
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -50,12 +56,8 @@ public abstract class AbstractInstitute  implements Runnable {
     public String getName() {
         return name;
     }
-
     public ArrayList<Document> getDocuments() {
         return documents;
-    }
-    public void setDocuments(ArrayList<Document> documents) {
-        this.documents = documents;
     }
     public DocumentManager getDocManager() {
         return docManager;
@@ -63,10 +65,10 @@ public abstract class AbstractInstitute  implements Runnable {
     public void setDocManager(DocumentManager docManager) {
         this.docManager = docManager;
     }
-    public boolean isWaitBeforeRequest() {
-        return waitBeforeRequest;
+    public boolean isNeedToWaitBeforeNewRequest() {
+        return needToWaitBeforeNewRequest;
     }
-    public void setWaitBeforeRequest(boolean waitBeforeRequest) {
-        this.waitBeforeRequest = waitBeforeRequest;
+    public void setNeedToWaitBeforeNewRequest(boolean needToWaitBeforeNewRequest) {
+        this.needToWaitBeforeNewRequest = needToWaitBeforeNewRequest;
     }
 }

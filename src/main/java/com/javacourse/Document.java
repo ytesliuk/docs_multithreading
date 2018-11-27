@@ -5,27 +5,31 @@ package com.javacourse;
  */
 public class Document {
     private int id;
-    private DocumentType type;
+    private String name;
+    private ScientistSpeciality speciality;
 
-    public Document(int id, DocumentType type) {
-        this.id = id;
-        this.type = type;
+    public Document(String name, ScientistSpeciality speciality) {
+        this.name = name;
+        this.speciality = speciality;
     }
 
     public int getId() {
         return id;
     }
-
     public void setId(int id) {
         this.id = id;
     }
-
-    public DocumentType getType() {
-        return type;
+    public ScientistSpeciality getSpeciality() {
+        return speciality;
     }
-
-    public void setType(DocumentType type) {
-        this.type = type;
+    public void setSpeciality(ScientistSpeciality speciality) {
+        this.speciality = speciality;
+    }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
     }
 }
 

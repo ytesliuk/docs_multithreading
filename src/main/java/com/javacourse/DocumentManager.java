@@ -1,5 +1,7 @@
 package com.javacourse;
 
+import com.javacourse.institutes.AbstractInstitute;
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.*;
@@ -17,12 +19,16 @@ public class DocumentManager {
 
     DocumentManager(List<Document> documents) {
         this.documents = documents;
+        documentsQueue = new LinkedList<>();
+        currentDocumentNumber = new AtomicInteger(0);
+        shuffleDocuments(documents);
+    }
+
+    private void shuffleDocuments(List<Document> documents) {
         Collections.shuffle(documents);
         for (int i = 0; i < documents.size(); i++) {
             documents.get(i).setId(i);
         }
-        documentsQueue = new LinkedList<>();
-        currentDocumentNumber = new AtomicInteger(0);
     }
 
     public void createQueue() {
@@ -47,16 +53,12 @@ public class DocumentManager {
         return documents.size() > currentDocumentNumber.get();
     }
 
-    public Deque<Document> getQueue() {
-        return documentsQueue;
-    }
-
     public void updateQueue() {
         if (documentsQueue.size() <= 25) {
             while (documentsQueue.size() < QUEUE_SIZE && hasAvailableDocument()) {
                 addToQueue();
             }
-            System.out.println("\nupdated; " + currentDocumentNumber + "\n");
+            System.out.println("\nupdated: current document number " + currentDocumentNumber + "\n");
         }
     }
 
@@ -64,8 +66,12 @@ public class DocumentManager {
         lock.lock();
         System.out.print("locked   ");
         try {
-            if (institute.takeDocumentForRevision(documentsQueue.getFirst())) {
+            Document nextDocument = documentsQueue.getFirst();
+            if (institute.isAccepted(nextDocument)) {
+                System.out.print(institute.getName() + " get " + nextDocument.getId() + " " + nextDocument.getSpeciality());
                 documentsQueue.pollFirst();
+            } else {
+                System.out.print(institute.getName() + " stopped on " + nextDocument.getId() + " " + nextDocument.getSpeciality());
             }
         } finally {
             lock.unlock();
